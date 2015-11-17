@@ -1,0 +1,74 @@
+{
+  "name": "babel-plugin-tranform-decorators-unofficial",
+  "version": "1.0.0",
+  "description": "unofficial fix of babel-plugin-transform-decorators",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyeonupark/babel-plugin-transform-decorators-unofficial.git"
+  },
+  "keywords": [
+    "babel-plugin"
+  ],
+  "author": "HyeonuPark",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hyeonupark/babel-plugin-transform-decorators-unofficial/issues"
+  },
+  "homepage": "https://github.com/hyeonupark/babel-plugin-transform-decorators-unofficial#readme",
+  "babel": {
+    "presets": [
+      "escompile-node"
+    ]
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "globals": [
+      "describe",
+      "it"
+    ],
+    "ignore": [
+      "node_modules/**",
+      "bin/**",
+      "bin_test/**",
+      "gulpfile.js",
+      "tmp/**"
+    ]
+  },
+  "dependencies": {
+    "babel-template": "^6.1.18"
+  },
+  "devDependencies": {
+    "babel-core": "^6.1.21",
+    "babel-plugin-check-es2015-constants": "^6.1.18",
+    "babel-plugin-syntax-decorators": "^6.1.18",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.1.18",
+    "babel-plugin-transform-es2015-block-scoped-functions": "^6.1.18",
+    "babel-plugin-transform-es2015-block-scoping": "^6.1.18",
+    "babel-plugin-transform-es2015-classes": "^6.1.21",
+    "babel-plugin-transform-es2015-computed-properties": "^6.1.18",
+    "babel-plugin-transform-es2015-destructuring": "^6.1.18",
+    "babel-plugin-transform-es2015-for-of": "^6.1.18",
+    "babel-plugin-transform-es2015-function-name": "^6.1.18",
+    "babel-plugin-transform-es2015-literals": "^6.1.18",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.1.20",
+    "babel-plugin-transform-es2015-object-super": "^6.1.18",
+    "babel-plugin-transform-es2015-parameters": "^6.1.18",
+    "babel-plugin-transform-es2015-shorthand-properties": "^6.1.18",
+    "babel-plugin-transform-es2015-spread": "^6.1.18",
+    "babel-plugin-transform-es2015-sticky-regex": "^6.1.18",
+    "babel-plugin-transform-es2015-template-literals": "^6.1.18",
+    "babel-plugin-transform-es2015-typeof-symbol": "^6.1.18",
+    "babel-plugin-transform-es2015-unicode-regex": "^6.1.18",
+    "babel-plugin-transform-regenerator": "^6.1.18",
+    "chai": "^3.4.1",
+    "del": "^2.1.0",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-standard": "^5.2.2"
+  }
+}
