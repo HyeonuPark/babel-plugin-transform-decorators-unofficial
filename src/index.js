@@ -145,6 +145,6 @@ function processMethodsAndGetStatements (t, path, state) {
         ))
       }
       return prev
-    }, [t.classDeclaration(classId , superClass, body, [])])
+    }, [t.classDeclaration(classId, superClass, body, [])])
     .concat([t.returnStatement(classId)])
 }

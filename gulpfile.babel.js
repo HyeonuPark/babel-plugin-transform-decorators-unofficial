@@ -78,7 +78,7 @@ gulp.task('lint', () => {
     }))
 })
 
-gulp.task('test', ['buildTestNode', 'buildTestBrowser'], () => {
+gulp.task('test', ['buildTestNode'], () => {
   return gulp.src('bin_test/**/*.js', {read: false})
     .pipe(mocha())
 })
