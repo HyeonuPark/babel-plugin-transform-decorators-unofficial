@@ -4,7 +4,8 @@
   "description": "unofficial fix of babel-plugin-transform-decorators",
   "main": "bin/index.js",
   "scripts": {
-    "test": "gulp"
+    "test": "gulp",
+    "prepublish": "NODE_ENV=production gulp buildSrc"
   },
   "repository": {
     "type": "git",
@@ -20,8 +21,10 @@
   },
   "homepage": "https://github.com/hyeonupark/babel-plugin-transform-decorators-unofficial#readme",
   "babel": {
-    "presets": [
-      "escompile-node"
+    "plugins": [
+      "transform-es2015-modules-commonjs",
+      "transform-es2015-destructuring",
+      "transform-es2015-spread"
     ]
   },
   "standard": {
@@ -65,6 +68,7 @@
     "babel-plugin-transform-es2015-typeof-symbol": "^6.1.18",
     "babel-plugin-transform-es2015-unicode-regex": "^6.1.18",
     "babel-plugin-transform-regenerator": "^6.1.18",
+    "babel-plugin-transform-strict-mode": "^6.1.18",
     "chai": "^3.4.1",
     "del": "^2.1.0",
     "gulp": "^3.9.0",

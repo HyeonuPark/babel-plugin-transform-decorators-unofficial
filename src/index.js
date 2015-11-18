@@ -26,7 +26,8 @@ const buildMethodDecoratorHelperFunction = template(`
   }
 `)
 
-export default function ({types: t}) {
+export default function (babel) {
+  const {types: t} = babel
   return {
     visitor: {
       Program: {
@@ -56,13 +57,13 @@ export default function ({types: t}) {
 
       ClassDeclaration (path, state) {
         path.replaceWithMultiple(
-          processClassDeclaration(t, path, state, path.node)
+          processClassDeclaration(t, path, state)
         )
       },
 
       ClassExpression (path, state) {
         path.replaceWith(
-          processClassExpression(t, path, state, path.node)
+          processClassExpression(t, path, state)
         )
       }
     }

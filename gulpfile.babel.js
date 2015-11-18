@@ -16,6 +16,7 @@ gulp.task('buildSrc', ['clear'], () => {
   return gulp.src('src/**/*.js')
     .pipe(babel({
       plugins: [
+        'transform-strict-mode',
         'transform-es2015-modules-commonjs',
         'transform-es2015-destructuring',
         'transform-es2015-spread'
@@ -30,6 +31,7 @@ gulp.task('buildTestNode', ['buildSrc'], () => {
       plugins: [
         'syntax-decorators',
         require('./bin/index.js').default,
+        'transform-strict-mode',
         'transform-es2015-modules-commonjs',
         'transform-es2015-destructuring',
         'transform-es2015-spread'
@@ -44,6 +46,7 @@ gulp.task('buildTestBrowser', ['buildSrc'], () => {
       plugins: [
         'syntax-decorators',
         require('./bin/index.js').default,
+        'transform-strict-mode',
         'transform-es2015-template-literals',
         'transform-es2015-literals',
         'transform-es2015-function-name',
