@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-tranform-decorators-unofficial",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "unofficial fix of babel-plugin-transform-decorators",
   "main": "bin/index.js",
   "scripts": {

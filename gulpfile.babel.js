@@ -3,6 +3,7 @@ import standard from 'gulp-standard'
 import mocha from 'gulp-mocha'
 import babel from 'gulp-babel'
 import del from 'del'
+import preset_es2015 from 'babel-preset-es2015'
 
 gulp.task('default', ['lint', 'test'])
 
@@ -17,9 +18,10 @@ gulp.task('buildSrc', ['clear'], () => {
     .pipe(babel({
       plugins: [
         'transform-strict-mode',
-        'transform-es2015-modules-commonjs',
+        'transform-es2015-spread',
+        'transform-es2015-parameters',
         'transform-es2015-destructuring',
-        'transform-es2015-spread'
+        'transform-es2015-modules-commonjs'
       ]
     }))
     .pipe(gulp.dest('bin'))
@@ -32,9 +34,10 @@ gulp.task('buildTestNode', ['buildSrc'], () => {
         'syntax-decorators',
         require('./bin/index.js').default,
         'transform-strict-mode',
-        'transform-es2015-modules-commonjs',
+        'transform-es2015-spread',
+        'transform-es2015-parameters',
         'transform-es2015-destructuring',
-        'transform-es2015-spread'
+        'transform-es2015-modules-commonjs'
       ]
     }))
     .pipe(gulp.dest('bin_test/node'))
@@ -46,7 +49,6 @@ gulp.task('buildTestBrowser', ['buildSrc'], () => {
       plugins: [
         'syntax-decorators',
         require('./bin/index.js').default,
-        'transform-strict-mode',
         'transform-es2015-template-literals',
         'transform-es2015-literals',
         'transform-es2015-function-name',
@@ -66,7 +68,7 @@ gulp.task('buildTestBrowser', ['buildSrc'], () => {
         'transform-es2015-block-scoping',
         'transform-es2015-typeof-symbol',
         'transform-es2015-modules-commonjs',
-        ['transform-regenerator', {async: false, asyncGenerators: false}]
+        'transform-regenerator'
       ]
     }))
     .pipe(gulp.dest('bin_test/browser'))
@@ -84,4 +86,12 @@ gulp.task('lint', () => {
 gulp.task('test', ['buildTestNode', 'buildTestBrowser'], () => {
   return gulp.src('bin_test/**/*.js', {read: false})
     .pipe(mocha())
+})
+
+gulp.task('buildMore', () => {
+  return gulp.src('bin_test/**/*.js')
+    .pipe(babel({
+      presets: ['es2015']
+    }))
+    .pipe(gulp.dest('tmp/final'))
 })
