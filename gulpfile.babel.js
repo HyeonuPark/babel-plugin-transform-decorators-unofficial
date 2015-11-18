@@ -3,7 +3,6 @@ import standard from 'gulp-standard'
 import mocha from 'gulp-mocha'
 import babel from 'gulp-babel'
 import del from 'del'
-import preset_es2015 from 'babel-preset-es2015'
 
 gulp.task('default', ['lint', 'test'])
 
@@ -86,12 +85,4 @@ gulp.task('lint', () => {
 gulp.task('test', ['buildTestNode', 'buildTestBrowser'], () => {
   return gulp.src('bin_test/**/*.js', {read: false})
     .pipe(mocha())
-})
-
-gulp.task('buildMore', () => {
-  return gulp.src('bin_test/**/*.js')
-    .pipe(babel({
-      presets: ['es2015']
-    }))
-    .pipe(gulp.dest('tmp/final'))
 })
