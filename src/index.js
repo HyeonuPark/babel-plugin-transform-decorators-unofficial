@@ -26,8 +26,7 @@ const buildMethodDecoratorHelperFunction = template(`
   }
 `)
 
-export default function (babel) {
-  const {types: t} = babel
+module.exports = function ({types: t}) {
   return {
     visitor: {
       Program: {

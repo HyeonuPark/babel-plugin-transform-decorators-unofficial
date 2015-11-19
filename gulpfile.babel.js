@@ -4,13 +4,15 @@ import mocha from 'gulp-mocha'
 import babel from 'gulp-babel'
 import del from 'del'
 
+import thisModule from './src/index.js'
+
 gulp.task('default', ['lint', 'test'])
 
 gulp.task('clear', () => {
   return del(['bin/**', 'bin_*/**', 'tmp/**'])
 })
 
-gulp.task('build', ['buildTestNode', 'buildTestBrowser'])
+gulp.task('build', ['buildSrc', 'buildTestNode', 'buildTestBrowser'])
 
 gulp.task('buildSrc', ['clear'], () => {
   return gulp.src('src/**/*.js')
@@ -26,12 +28,12 @@ gulp.task('buildSrc', ['clear'], () => {
     .pipe(gulp.dest('bin'))
 })
 
-gulp.task('buildTestNode', ['buildSrc'], () => {
+gulp.task('buildTestNode', () => {
   return gulp.src('test/**/*.js')
     .pipe(babel({
       plugins: [
         'syntax-decorators',
-        require('./bin/index.js').default,
+        thisModule,
         'transform-strict-mode',
         'transform-es2015-spread',
         'transform-es2015-parameters',
@@ -42,12 +44,12 @@ gulp.task('buildTestNode', ['buildSrc'], () => {
     .pipe(gulp.dest('bin_test/node'))
 })
 
-gulp.task('buildTestBrowser', ['buildSrc'], () => {
+gulp.task('buildTestBrowser', () => {
   return gulp.src('test/**/*.js')
     .pipe(babel({
       plugins: [
         'syntax-decorators',
-        require('./bin/index.js').default,
+        thisModule,
         'transform-es2015-template-literals',
         'transform-es2015-literals',
         'transform-es2015-function-name',
