@@ -56,9 +56,13 @@ export default function (babel) {
       },
 
       ClassDeclaration (path, state) {
-        path.replaceWithMultiple(
-          processClassDeclaration(t, path, state)
-        )
+        const nodes = processClassDeclaration(t, path, state)
+        if (path.parentPath.node.type.startsWith('Export')) {
+          path.replaceWith(nodes[0])
+          path.parentPath.insertAfter(nodes.slice(1))
+          return
+        }
+        path.replaceWithMultiple(nodes)
       },
 
       ClassExpression (path, state) {
