@@ -68,13 +68,14 @@ function collectDecoratedMethods (t, path, state, node, data) {
     }
   }
 
-  return path._decoratedMethods = decoratedMethods
+  path._decoratedMethods = decoratedMethods
+  return decoratedMethods
 }
 
 function processPureClassDeclaration (t, path, state, node) {
   node = node || path.node
 
-  //mark as parsed to prevent recursion
+  // mark as parsed to prevent recursion
   node._parsedDecorators = true
 
   const decoratedMethods = collectDecoratedMethods(t, path, state, node)
