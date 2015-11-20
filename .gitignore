@@ -2,4 +2,5 @@ node_modules
 *.log
 bin
 bin_*
+local
 tmp

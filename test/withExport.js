@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+const basename = __dirname.split('/').reverse()[0]
 
 @annotated
 @size('grande')
@@ -13,7 +14,7 @@ export class MyClass {
   }
 }
 
-describe('Decorator on exported class declaration', () => {
+describe(`${basename}-Decorator on exported class declaration`, () => {
   it('should modify class constructor', () => {
     expect(MyClass.isAnnotated).to.be.true
   })
@@ -23,7 +24,7 @@ describe('Decorator on exported class declaration', () => {
   })
 })
 
-describe('Decorator on method of exported class declaration', () => {
+describe(`${basename}-Decorator on method of exported class declaration`, () => {
   it('should replace method itself', () => {
     const myObj = new MyClass()
     expect(myObj.doSomething()).to.equal('nyan')

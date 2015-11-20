@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+const basename = __dirname.split('/').reverse()[0]
 
 const MyClass = class {
   constructor (opt) {
@@ -11,7 +12,7 @@ const MyClass = class {
   }
 }
 
-describe('Decorator on method of class expression', () => {
+describe(`${basename}-Decorator on method of class expression`, () => {
   it('should replace method itself', () => {
     const myObj = new MyClass()
     expect(myObj.doSomething()).to.equal('nyan')

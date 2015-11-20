@@ -28,7 +28,7 @@ gulp.task('buildSrc', ['clear'], () => {
     .pipe(gulp.dest('bin'))
 })
 
-gulp.task('buildTestNode', () => {
+gulp.task('buildTestNode', ['clear'], () => {
   return gulp.src('test/**/*.js')
     .pipe(babel({
       plugins: [
@@ -44,7 +44,7 @@ gulp.task('buildTestNode', () => {
     .pipe(gulp.dest('bin_test/node'))
 })
 
-gulp.task('buildTestBrowser', () => {
+gulp.task('buildTestBrowser', ['clear'], () => {
   return gulp.src('test/**/*.js')
     .pipe(babel({
       plugins: [

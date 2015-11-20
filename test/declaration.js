@@ -1,4 +1,5 @@
 import {expect} from 'chai'
+const basename = __dirname.split('/').reverse()[0]
 
 @annotated
 @size('grande')
@@ -13,7 +14,7 @@ class MyClass {
   }
 }
 
-describe('Decorator on class declaration', () => {
+describe(`${basename}-Decorator on class declaration`, () => {
   it('should modify class constructor', () => {
     expect(MyClass.isAnnotated).to.be.true
   })
@@ -23,7 +24,7 @@ describe('Decorator on class declaration', () => {
   })
 })
 
-describe('Decorator on method of class declaration', () => {
+describe(`${basename}-Decorator on method of class declaration`, () => {
   it('should replace method itself', () => {
     const myObj = new MyClass()
     expect(myObj.doSomething()).to.equal('nyan')

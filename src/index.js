@@ -26,6 +26,130 @@ const buildMethodDecoratorHelperFunction = template(`
   }
 `)
 
+function collectDecoratedMethods (t, path, state, node, data) {
+  node = node || path.node
+
+  if (path._decoratedMethods) return path._decoratedMethods
+
+  // collect all decorated methods
+  const decoratedMethods = []
+  const methodNameSet = new Set()
+  for (let maybeMethod of node.body.body) {
+    // ignore other then methods
+    if (!t.isClassMethod(maybeMethod)) continue
+
+    // constructor and computed named methods cannot have decorators
+    const {key, kind, computed, decorators} = maybeMethod
+    if (kind === 'constructor' || computed) {
+      if (decorators && decorators.length) {
+        throw path.buildCodeFrameError(ERR_INVALID_METHOD_DECO)
+      }
+      continue
+    }
+
+    // ignore non-decorated methods
+    if (!decorators || !decorators.length) continue
+
+    // remove decorators from original node
+    delete maybeMethod.decorators
+
+    const {name} = key
+    // check if decoratedMethods has the same named method
+    // ex) both getter and setter are decorated
+    if (methodNameSet.has(name)) {
+      const existingMethod = decoratedMethods.find(method => {
+        return method.name === name
+      })
+      existingMethod.decorators =
+        existingMethod.decorators.concat(decorators)
+    } else {
+      methodNameSet.add(name)
+      decoratedMethods.push({name, decorators})
+    }
+  }
+
+  return path._decoratedMethods = decoratedMethods
+}
+
+function processPureClassDeclaration (t, path, state, node) {
+  node = node || path.node
+
+  //mark as parsed to prevent recursion
+  node._parsedDecorators = true
+
+  const decoratedMethods = collectDecoratedMethods(t, path, state, node)
+
+  // this class doesn't have method decorators
+  if (!decoratedMethods.length) {
+    return [node]
+  }
+
+  state.set(HAS_METHOD_DECORATOR, true)
+  const methodHelperRef = state.get(HELPER_METHOD_DECORATOR)
+  const nodes = [node]
+  for (let method of decoratedMethods) {
+    const methodDecorators = method.decorators.map(dec => dec.expression)
+    nodes.push(t.expressionStatement(
+      t.callExpression(methodHelperRef, [
+        node.id,
+        t.stringLiteral(method.name),
+        t.arrayExpression(methodDecorators)
+      ])
+    ))
+  }
+
+  return nodes
+}
+
+function processClassExpression (t, path, state, node) {
+  node = node || path.node
+
+  delete node.decorators
+
+  const decoratedMethods = collectDecoratedMethods(t, path, state, node)
+
+  if (!decoratedMethods.length) {
+    return node
+  }
+
+  const {id, superClass, body} = node
+  const classId = id || path.scope.generateUidIdentifier('anonymousClass')
+  const declaration =
+    t.classDeclaration(classId, superClass, body, [])
+  const processedDeclarations =
+    processPureClassDeclaration(t, path, state, declaration)
+  const declarationId = processedDeclarations[0].id
+
+  return t.callExpression(
+    t.functionExpression(null, [], t.blockStatement([
+      ...processedDeclarations,
+      t.returnStatement(declarationId)
+    ])),
+    []
+  )
+}
+
+function processClassDeclaration (t, path, state, node) {
+  node = node || path.node
+
+  const {id, superClass, body, decorators} = node
+  if (!decorators || !decorators.length) {
+    return processPureClassDeclaration(t, path, state, node)
+  }
+
+  state.set(HAS_CLASS_DECORATOR, true)
+  const classHelperRef = state.get(HELPER_CLASS_DECORATOR)
+
+  const expression = t.classExpression(id, superClass, body, [])
+  const decoratorExpressions = decorators.map(dec => dec.expression)
+  return [t.variableDeclaration('let', [
+    t.variableDeclarator(node.id, t.callExpression(classHelperRef, [
+      processClassExpression(t, path, state, expression),
+      t.arrayExpression(decoratorExpressions)
+    ]))
+  ])]
+}
+
 module.exports = function ({types: t}) {
   return {
     visitor: {
@@ -55,142 +179,22 @@ module.exports = function ({types: t}) {
       },
 
       ClassDeclaration (path, state) {
+        if (path.node._parsedDecorators) return
+
         const nodes = processClassDeclaration(t, path, state)
         if (path.parentPath.node.type.startsWith('Export')) {
+          if (nodes.length > 1) {
+            path.parentPath.insertAfter(nodes.slice(1))
+          }
           path.replaceWith(nodes[0])
-          path.parentPath.insertAfter(nodes.slice(1))
           return
         }
         path.replaceWithMultiple(nodes)
       },
 
       ClassExpression (path, state) {
-        path.replaceWith(
-          processClassExpression(t, path, state)
-        )
+        path.replaceWith(processClassExpression(t, path, state))
       }
     }
   }
-}
-
-function collectDecoratedMethods (t, path, state, node, data) {
-  node = node || path.node
-  data = data || {}
-
-  // collect all decorated methods
-  const decoratedMethods = []
-  const methodNameSet = new Set()
-  for (let maybeMethod of node.body.body) {
-    // ignore other then methods
-    if (!t.isClassMethod(maybeMethod)) continue
-
-    // constructor and computed named methods cannot have decorators
-    const {key, kind, computed, decorators} = maybeMethod
-    if (kind === 'constructor' || computed) {
-      if (decorators && decorators.length) {
-        throw path.buildCodeFrameError(ERR_INVALID_METHOD_DECO)
-      }
-      continue
-    }
-
-    // ignore non-decorated methods
-    if (!decorators || !decorators.length) continue
-
-    // remove decorators from original node
-    maybeMethod.decorators = []
-
-    const {name} = key
-    // check if decoratedMethods has the same named method
-    // ex) both getter and setter are decorated
-    if (methodNameSet.has(name)) {
-      const existingMethod = decoratedMethods.find(method => {
-        return method.name === name
-      })
-      existingMethod.decorators =
-        existingMethod.decorators.concat(decorators)
-    } else {
-      methodNameSet.add(name)
-      decoratedMethods.push({name, decorators})
-    }
-  }
-
-  return decoratedMethods
-}
-
-function processPureClassDeclaration (t, path, state, node, data) {
-  node = node || path.node
-  data = data || {}
-
-  const decoratedMethods = data.decoratedMethods ||
-    collectDecoratedMethods(t, path, state, node)
-  // this class doesn't have method decorators
-  if (!decoratedMethods.length) {
-    return [node]
-  }
-
-  state.set(HAS_METHOD_DECORATOR, true)
-  const methodHelperRef = state.get(HELPER_METHOD_DECORATOR)
-  const nodes = [node]
-  for (let method of decoratedMethods) {
-    const methodDecorators = method.decorators.map(dec => dec.expression)
-    nodes.push(t.expressionStatement(
-      t.callExpression(methodHelperRef, [
-        node.id,
-        t.stringLiteral(method.name),
-        t.arrayExpression(methodDecorators)
-      ])
-    ))
-  }
-
-  return nodes
-}
-
-function processClassExpression (t, path, state, node, data) {
-  node = node || path.node
-  data = data || {}
-
-  const decoratedMethods = data.decoratedMethods ||
-    collectDecoratedMethods(t, path, state, node)
-
-  if (!decoratedMethods.length) {
-    return node
-  }
-
-  const {id, superClass, body, decorators} = node
-  const classId = id || path.scope.generateUidIdentifier('anonymousClass')
-  const declaration =
-    t.classDeclaration(classId, superClass, body, decorators || [])
-  const processedDeclaration =
-    processPureClassDeclaration(t, path, state, declaration, {decoratedMethods})
-  const declarationId = processedDeclaration[0].id
-
-  return t.callExpression(
-    t.functionExpression(null, [], t.blockStatement([
-      ...processedDeclaration,
-      t.returnStatement(declarationId)
-    ])),
-    []
-  )
-}
-
-function processClassDeclaration (t, path, state, node, data) {
-  node = node || path.node
-  data = data || {}
-
-  const {id, superClass, body, decorators} = node
-  if (!decorators || !decorators.length) {
-    return processPureClassDeclaration(t, path, state, node, {})
-  }
-
-  state.set(HAS_CLASS_DECORATOR, true)
-  const classHelperRef = state.get(HELPER_CLASS_DECORATOR)
-
-  const expression = t.ClassExpression(id, superClass, body, [])
-  const decoratorExpressions = decorators.map(dec => dec.expression)
-  return [t.variableDeclaration('let', [
-    t.variableDeclarator(node.id, t.callExpression(classHelperRef, [
-      processClassExpression(t, path, state, expression, {}),
-      t.arrayExpression(decoratorExpressions)
-    ]))
-  ])]
 }
